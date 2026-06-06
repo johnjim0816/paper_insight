@@ -17,6 +17,7 @@ body {
 
 button,
 input,
+select,
 textarea {
   font: inherit;
 }
@@ -300,6 +301,7 @@ label {
 }
 
 input,
+select,
 textarea {
   border: 1px solid #c9d4df;
   border-radius: 7px;
@@ -316,6 +318,58 @@ textarea {
   display: grid;
   gap: 14px;
   grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.topic-list {
+  display: grid;
+  gap: 18px;
+}
+
+.topic-block {
+  border-top: 1px solid #e2e8f0;
+  display: grid;
+  gap: 14px;
+  padding-top: 16px;
+}
+
+.topic-block:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.topic-block-header {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+}
+
+.topic-block-header h4 {
+  color: #1f2933;
+  font-size: 16px;
+  line-height: 1.25;
+  margin: 3px 0 0;
+  overflow-wrap: anywhere;
+}
+
+.subtle-danger {
+  color: #9f1239;
+}
+
+.secondary-action {
+  justify-self: start;
+}
+
+.table-actions {
+  align-items: flex-end;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.inline-label {
+  min-width: 180px;
 }
 
 .paper-table {

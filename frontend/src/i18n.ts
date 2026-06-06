@@ -72,14 +72,23 @@ export type AppCopy = {
       lookbackDays: string;
       maxResults: string;
     };
+    topicHeading: (index: number) => string;
+    untitledTopic: string;
+    addTopic: string;
+    removeTopic: (name: string) => string;
     save: string;
   };
   papers: {
     loading: string;
+    searching: string;
     count: (count: number) => string;
     empty: string;
     eyebrow: string;
+    topicFilter: string;
+    allTopics: string;
+    searchSelected: string;
     refresh: string;
+    warning: (warnings: string[]) => string;
     columns: {
       title: string;
       venue: string;
@@ -180,14 +189,23 @@ export const copy: Record<Language, AppCopy> = {
         lookbackDays: "回溯天数",
         maxResults: "每个来源最多结果数"
       },
+      topicHeading: (index) => `主题 ${index}`,
+      untitledTopic: "未命名主题",
+      addTopic: "新增主题",
+      removeTopic: (name) => `删除主题 ${name}`,
       save: "保存配置"
     },
     papers: {
       loading: "正在加载论文...",
+      searching: "正在搜索论文...",
       count: (count) => `${count} 篇论文`,
       empty: "还没有论文",
       eyebrow: "最近匹配",
+      topicFilter: "搜索主题",
+      allTopics: "全部主题",
+      searchSelected: "搜索选中主题",
       refresh: "刷新论文",
+      warning: (warnings) => `警告：${warnings.join("; ")}`,
       columns: {
         title: "标题",
         venue: "会议/期刊",
@@ -286,14 +304,23 @@ export const copy: Record<Language, AppCopy> = {
         lookbackDays: "Lookback days",
         maxResults: "Max results per source"
       },
+      topicHeading: (index) => `Topic ${index}`,
+      untitledTopic: "Untitled topic",
+      addTopic: "Add topic",
+      removeTopic: (name) => `Remove topic ${name}`,
       save: "Save config"
     },
     papers: {
       loading: "Loading papers...",
+      searching: "Searching papers...",
       count: (count) => `${count} papers`,
       empty: "No papers yet",
       eyebrow: "Recent matches",
+      topicFilter: "Search topic",
+      allTopics: "All topics",
+      searchSelected: "Search selected topic",
       refresh: "Refresh papers",
+      warning: (warnings) => `Warning: ${warnings.join("; ")}`,
       columns: {
         title: "Title",
         venue: "Venue",

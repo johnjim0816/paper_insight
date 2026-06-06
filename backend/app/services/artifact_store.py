@@ -1,4 +1,5 @@
 import json
+import re
 from dataclasses import asdict
 from datetime import datetime, timezone
 from pathlib import Path
@@ -24,20 +25,35 @@ def _model_dump(model: Any) -> dict[str, Any]:
     return model.dict()
 
 
+def _slugify(value: str) -> str:
+    value = value.strip().lower()
+    value = re.sub(r"[^\w\s-]", "", value, flags=re.UNICODE)
+    value = re.sub(r"[-\s]+", "-", value).strip("-")
+    return value[:80] or "topic"
+
+
+def _paper_dir(data_dir: Path, topic_name: str | None) -> Path:
+    if topic_name:
+        return data_dir / "topics" / _slugify(topic_name) / "papers"
+    return data_dir / "papers"
+
+
 def save_paper_search_artifacts(
     papers: list[PaperResponse],
     warnings: list[str],
     query: PaperQuery,
+    topic_name: str | None = None,
     settings: Settings | None = None,
 ) -> None:
     settings = settings or get_settings()
-    paper_dir = settings.data_dir / "papers"
+    paper_dir = _paper_dir(settings.data_dir, topic_name)
     retrieved_at = _now_iso()
 
     _write_json(
         paper_dir / "papers.json",
         {
             "retrieved_at": retrieved_at,
+            "topic": topic_name,
             "count": len(papers),
             "papers": [_model_dump(paper) for paper in papers],
             "warnings": warnings,
@@ -47,6 +63,7 @@ def save_paper_search_artifacts(
         paper_dir / "sources.json",
         {
             "retrieved_at": retrieved_at,
+            "topic": topic_name,
             "query": asdict(query),
             "warnings": warnings,
         },

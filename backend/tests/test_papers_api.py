@@ -34,6 +34,44 @@ class RateLimitedSource:
         raise httpx.HTTPStatusError("Client error '429 ' for url 'https://example.test/search?query=very-long'", request=request, response=response)
 
 
+class MultiTopicSource:
+    def __init__(self):
+        self.queries = []
+
+    async def search(self, query):
+        self.queries.append(query)
+        return [
+            PaperCandidate(
+                source="fake",
+                source_id="rl-1",
+                title="Deep Reinforcement Learning for Agents",
+                abstract="A reinforcement learning paper.",
+                authors=["Alice"],
+                venue="NeurIPS",
+                published_at="2026-06-05",
+                url="https://example.com/rl",
+                doi="10.1000/rl",
+                arxiv_id=None,
+                semantic_scholar_id=None,
+                citation_count=8,
+            ),
+            PaperCandidate(
+                source="fake",
+                source_id="wm-1",
+                title="World Model Planning",
+                abstract="A world model paper.",
+                authors=["Bob"],
+                venue="ICLR",
+                published_at="2026-06-04",
+                url="https://example.com/world-model",
+                doi="10.1000/wm",
+                arxiv_id=None,
+                semantic_scholar_id=None,
+                citation_count=6,
+            ),
+        ]
+
+
 def test_search_papers_saves_matches(client, monkeypatch):
     config = {
         "topics": [
@@ -64,6 +102,31 @@ def test_search_papers_saves_matches(client, monkeypatch):
     assert list_response.json()[0]["dedup_key"] == "doi:10.1000/fake"
 
 
+def test_search_papers_filters_to_requested_topic(client, monkeypatch):
+    config = {
+        "topics": [
+            {"name": "RL", "keywords": ["reinforcement learning"], "venues": ["NeurIPS"], "exclude_keywords": []},
+            {"name": "worldmodel", "keywords": ["world model"], "venues": ["ICLR"], "exclude_keywords": []},
+        ],
+        "search": {"lookback_days": 7, "max_results_per_source": 5},
+        "summary": {"language": "zh"},
+        "delivery": {"provider": "feishu", "mode": "app_bot", "recipient_id_type": "email"},
+    }
+    client.put("/api/config", json=config)
+    source = MultiTopicSource()
+    monkeypatch.setattr("app.api.papers.default_sources", lambda: [source])
+
+    response = client.post("/api/papers/search?topic=RL")
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["count"] == 1
+    assert data["papers"][0]["title"] == "Deep Reinforcement Learning for Agents"
+    assert data["papers"][0]["topic_names"] == ["RL"]
+    assert source.queries[0].keywords == ["reinforcement learning"]
+    assert source.queries[0].venues == ["NeurIPS"]
+
+
 def test_search_papers_writes_results_to_configured_data_dir(client, monkeypatch, tmp_path):
     get_settings.cache_clear()
     monkeypatch.setenv("DATA_DIR", str(tmp_path))
@@ -83,6 +146,33 @@ def test_search_papers_writes_results_to_configured_data_dir(client, monkeypatch
 
     sources_payload = json.loads(sources_file.read_text(encoding="utf-8"))
     assert sources_payload["query"]["keywords"] == ["LLM agent", "tool use", "autonomous agents"]
+    get_settings.cache_clear()
+
+
+def test_topic_search_writes_results_to_topic_data_dir(client, monkeypatch, tmp_path):
+    get_settings.cache_clear()
+    monkeypatch.setenv("DATA_DIR", str(tmp_path))
+    config = {
+        "topics": [
+            {"name": "RL", "keywords": ["reinforcement learning"], "venues": ["NeurIPS"], "exclude_keywords": []},
+            {"name": "worldmodel", "keywords": ["world model"], "venues": ["ICLR"], "exclude_keywords": []},
+        ],
+        "search": {"lookback_days": 7, "max_results_per_source": 5},
+        "summary": {"language": "zh"},
+        "delivery": {"provider": "feishu", "mode": "app_bot", "recipient_id_type": "email"},
+    }
+    client.put("/api/config", json=config)
+    monkeypatch.setattr("app.api.papers.default_sources", lambda: [MultiTopicSource()])
+
+    response = client.post("/api/papers/search?topic=RL")
+
+    assert response.status_code == 200
+    papers_file = tmp_path / "topics" / "rl" / "papers" / "papers.json"
+    sources_file = tmp_path / "topics" / "rl" / "papers" / "sources.json"
+    assert papers_file.exists()
+    assert sources_file.exists()
+    assert json.loads(papers_file.read_text(encoding="utf-8"))["papers"][0]["topic_names"] == ["RL"]
+    assert json.loads(sources_file.read_text(encoding="utf-8"))["topic"] == "RL"
     get_settings.cache_clear()
 
 

@@ -17,7 +17,12 @@ export const api = {
   getConfig: () => request<AppConfig>("/api/config"),
   saveConfig: (config: AppConfig) =>
     request<AppConfig>("/api/config", { method: "PUT", body: JSON.stringify(config) }),
-  searchPapers: () => request<{ count: number; papers: Paper[]; warnings: string[] }>("/api/papers/search", { method: "POST" }),
+  searchPapers: (topic?: string) => {
+    const query = topic ? `?topic=${encodeURIComponent(topic)}` : "";
+    return request<{ count: number; papers: Paper[]; warnings: string[] }>(`/api/papers/search${query}`, {
+      method: "POST"
+    });
+  },
   listPapers: () => request<Paper[]>("/api/papers"),
   generateReport: () => request<Report>("/api/reports/generate", { method: "POST" }),
   generateAndSend: () => request<DeliveryResult>("/api/reports/generate-and-send", { method: "POST" }),

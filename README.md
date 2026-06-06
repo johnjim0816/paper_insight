@@ -41,12 +41,14 @@ Open `http://127.0.0.1:5173`.
 
 Use the Config page to set:
 
-- topic name
+- one or more topic names, such as `RL` and `worldmodel`
 - keywords, one per line
 - conference or journal names, one per line
 - exclusion keywords, one per line
 - search lookback window
 - max results per source
+
+Use the Papers page topic selector to search all topics or one configured topic at a time. Topic-specific searches are saved under `DATA_DIR/topics/<topic>/papers/`.
 
 Secrets stay in `backend/.env`, not in the browser.
 
