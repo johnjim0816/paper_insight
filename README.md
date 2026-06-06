@@ -4,6 +4,14 @@ Paper Insight is a local-first paper monitoring app. It lets you configure resea
 
 ## Local Setup
 
+### One-command start
+
+```bash
+./start.sh
+```
+
+Open `http://127.0.0.1:5173`. Press `Ctrl-C` in the terminal to stop both the backend and frontend.
+
 ### Backend
 
 ```bash
