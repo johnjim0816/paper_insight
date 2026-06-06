@@ -8,6 +8,15 @@ from app.schemas import AppConfigPayload, DeliveryConfig, SearchConfig, SummaryC
 
 router = APIRouter(prefix="/api/config", tags=["config"])
 
+DEFAULT_TOPICS = [
+    TopicConfig(
+        name="llm_agents",
+        keywords=["LLM agent", "tool use", "autonomous agents"],
+        venues=["ICLR", "NeurIPS", "ACL"],
+        exclude_keywords=["survey"],
+    )
+]
+
 
 def _clean(values: list[str]) -> list[str]:
     seen: set[str] = set()
@@ -21,28 +30,54 @@ def _clean(values: list[str]) -> list[str]:
     return cleaned
 
 
-def _read_config(db: Session) -> AppConfigPayload:
-    config = db.get(AppConfig, 1)
-    if config is None:
-        config = AppConfig(id=1)
-        db.add(config)
-        db.commit()
-        db.refresh(config)
-
-    statement = (
+def _topic_statement():
+    return (
         select(Topic)
         .options(selectinload(Topic.keywords), selectinload(Topic.venues), selectinload(Topic.exclusions))
         .order_by(Topic.name)
     )
-    topics = [
-        TopicConfig(
-            name=topic.name,
-            keywords=[item.value for item in topic.keywords],
-            venues=[item.value for item in topic.venues],
-            exclude_keywords=[item.value for item in topic.exclusions],
-        )
-        for topic in db.scalars(statement).all()
-    ]
+
+
+def _topic_to_config(topic: Topic) -> TopicConfig:
+    return TopicConfig(
+        name=topic.name,
+        keywords=[item.value for item in topic.keywords],
+        venues=[item.value for item in topic.venues],
+        exclude_keywords=[item.value for item in topic.exclusions],
+    )
+
+
+def _read_topics(db: Session) -> list[TopicConfig]:
+    return [_topic_to_config(topic) for topic in db.scalars(_topic_statement()).all()]
+
+
+def _seed_default_topics(db: Session) -> None:
+    for topic_payload in DEFAULT_TOPICS:
+        topic = Topic(name=topic_payload.name)
+        topic.keywords = [TopicKeyword(value=value) for value in topic_payload.keywords]
+        topic.venues = [TopicVenue(value=value) for value in topic_payload.venues]
+        topic.exclusions = [TopicExclusion(value=value) for value in topic_payload.exclude_keywords]
+        db.add(topic)
+
+
+def _read_config(db: Session) -> AppConfigPayload:
+    config = db.get(AppConfig, 1)
+    changed = False
+    if config is None:
+        config = AppConfig(id=1)
+        db.add(config)
+        db.flush()
+        changed = True
+
+    topics = _read_topics(db)
+    if not topics:
+        _seed_default_topics(db)
+        changed = True
+
+    if changed:
+        db.commit()
+        db.refresh(config)
+        topics = _read_topics(db)
 
     return AppConfigPayload(
         topics=topics,

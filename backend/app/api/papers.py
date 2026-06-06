@@ -1,3 +1,4 @@
+import httpx
 from fastapi import APIRouter, Depends
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -17,6 +18,14 @@ router = APIRouter(prefix="/api/papers", tags=["papers"])
 
 def default_sources() -> list[PaperSource]:
     return [ArxivSource(), SemanticScholarSource()]
+
+
+def _source_warning(source: PaperSource, exc: Exception) -> str:
+    if isinstance(exc, httpx.HTTPStatusError):
+        return f"{source.__class__.__name__}: HTTP {exc.response.status_code}"
+
+    message = str(exc).strip().splitlines()[0] if str(exc).strip() else exc.__class__.__name__
+    return f"{source.__class__.__name__}: {message}"
 
 
 @router.post("/search", response_model=PaperSearchResponse)
@@ -39,7 +48,7 @@ async def search_papers(db: Session = Depends(get_db)) -> PaperSearchResponse:
         try:
             candidates = await source.search(query)
         except Exception as exc:
-            warnings.append(f"{source.__class__.__name__}: {exc}")
+            warnings.append(_source_warning(source, exc))
             continue
         for candidate in candidates:
             match = match_paper(candidate, config.topics)

@@ -5,7 +5,14 @@ def test_get_default_config(client):
     assert data["search"]["lookback_days"] == 7
     assert data["search"]["max_results_per_source"] == 30
     assert data["delivery"]["provider"] == "feishu"
-    assert data["topics"] == []
+    assert data["topics"] == [
+        {
+            "name": "llm_agents",
+            "keywords": ["LLM agent", "tool use", "autonomous agents"],
+            "venues": ["ICLR", "NeurIPS", "ACL"],
+            "exclude_keywords": ["survey"],
+        }
+    ]
 
 
 def test_save_and_read_config(client):

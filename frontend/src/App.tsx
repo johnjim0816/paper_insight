@@ -1,7 +1,8 @@
-import { BookOpen, FileText, Home, Send, Settings } from "lucide-react";
+import { BookOpen, FileText, Home, Languages, Send, Settings } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { useState } from "react";
 
+import { copy, type AppCopy, type Language } from "./i18n";
 import { ConfigPage } from "./pages/ConfigPage";
 import { DashboardPage } from "./pages/DashboardPage";
 import { DeliveryPage } from "./pages/DeliveryPage";
@@ -11,25 +12,27 @@ import "./styles.css";
 
 type Page = "dashboard" | "config" | "papers" | "reports" | "delivery";
 
-const nav: { key: Page; label: string; icon: LucideIcon }[] = [
-  { key: "dashboard", label: "Dashboard", icon: Home },
-  { key: "config", label: "Config", icon: Settings },
-  { key: "papers", label: "Papers", icon: BookOpen },
-  { key: "reports", label: "Reports", icon: FileText },
-  { key: "delivery", label: "Feishu", icon: Send }
+const nav: { key: Page; icon: LucideIcon }[] = [
+  { key: "dashboard", icon: Home },
+  { key: "config", icon: Settings },
+  { key: "papers", icon: BookOpen },
+  { key: "reports", icon: FileText },
+  { key: "delivery", icon: Send }
 ];
 
-function renderPage(page: Page) {
-  if (page === "config") return <ConfigPage />;
-  if (page === "papers") return <PapersPage />;
-  if (page === "reports") return <ReportsPage />;
-  if (page === "delivery") return <DeliveryPage />;
-  return <DashboardPage />;
+function renderPage(page: Page, t: AppCopy) {
+  if (page === "config") return <ConfigPage t={t} />;
+  if (page === "papers") return <PapersPage t={t} />;
+  if (page === "reports") return <ReportsPage t={t} />;
+  if (page === "delivery") return <DeliveryPage t={t} />;
+  return <DashboardPage t={t} />;
 }
 
 export default function App() {
   const [page, setPage] = useState<Page>("dashboard");
-  const currentLabel = nav.find((item) => item.key === page)?.label ?? "Dashboard";
+  const [language, setLanguage] = useState<Language>("zh");
+  const t = copy[language];
+  const currentLabel = t.nav[page];
 
   return (
     <div className="app-shell">
@@ -44,7 +47,7 @@ export default function App() {
             return (
               <button key={item.key} className={page === item.key ? "active" : ""} onClick={() => setPage(item.key)}>
                 <Icon size={18} />
-                <span>{item.label}</span>
+                <span>{t.nav[item.key]}</span>
               </button>
             );
           })}
@@ -53,12 +56,33 @@ export default function App() {
       <main className="content">
         <header className="topbar">
           <div>
-            <p className="eyebrow">Local research monitor</p>
+            <p className="eyebrow">{t.shell.eyebrow}</p>
             <h2>{currentLabel}</h2>
           </div>
-          <div className="topbar-status">FastAPI: 127.0.0.1:8000</div>
+          <div className="topbar-actions">
+            <div className="language-switch" aria-label={t.language.label}>
+              <Languages size={16} />
+              <button
+                className={language === "zh" ? "active" : ""}
+                onClick={() => setLanguage("zh")}
+                type="button"
+                aria-pressed={language === "zh"}
+              >
+                {t.language.zh}
+              </button>
+              <button
+                className={language === "en" ? "active" : ""}
+                onClick={() => setLanguage("en")}
+                type="button"
+                aria-pressed={language === "en"}
+              >
+                {t.language.en}
+              </button>
+            </div>
+            <div className="topbar-status">{t.shell.apiStatus}</div>
+          </div>
         </header>
-        {renderPage(page)}
+        {renderPage(page, t)}
       </main>
     </div>
   );

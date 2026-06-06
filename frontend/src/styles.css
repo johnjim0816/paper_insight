@@ -98,6 +98,7 @@ a {
 .topbar {
   align-items: center;
   display: flex;
+  gap: 14px;
   justify-content: space-between;
   margin-bottom: 18px;
 }
@@ -116,6 +117,47 @@ a {
   color: #0f5f5a;
   font-size: 13px;
   padding: 7px 10px;
+}
+
+.topbar-actions {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.language-switch {
+  align-items: center;
+  background: #ffffff;
+  border: 1px solid #d8e0e8;
+  border-radius: 999px;
+  color: #64748b;
+  display: inline-flex;
+  gap: 4px;
+  padding: 4px;
+}
+
+.language-switch > svg {
+  margin-left: 4px;
+}
+
+.language-switch button {
+  background: transparent;
+  border: 0;
+  border-radius: 999px;
+  color: #64748b;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 800;
+  min-height: 28px;
+  padding: 4px 9px;
+}
+
+.language-switch button.active,
+.language-switch button:hover {
+  background: #0f766e;
+  color: #ffffff;
 }
 
 .eyebrow {
@@ -154,6 +196,7 @@ a {
 }
 
 .action-panel {
+  align-content: start;
   display: grid;
   gap: 22px;
   grid-column: span 1;
@@ -187,6 +230,7 @@ a {
 
 .button-row,
 .numeric-row {
+  align-items: flex-start;
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
@@ -362,6 +406,11 @@ textarea {
   .delivery-panel {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .topbar-actions {
+    justify-content: flex-start;
+    width: 100%;
   }
 
   .dashboard-grid,
