@@ -4,6 +4,12 @@ Paper Insight is a local-first paper monitoring app. It lets you configure resea
 
 ## Local Setup
 
+Install backend tooling first:
+
+```bash
+brew install uv
+```
+
 ### One-command start
 
 ```bash
@@ -16,11 +22,9 @@ Open `http://127.0.0.1:5173`. Press `Ctrl-C` in the terminal to stop both the ba
 
 ```bash
 cd backend
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -e ".[dev]"
+uv sync --extra dev
 cp ../.env.example .env
-uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
+uv run uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
 ```
 
 ### Frontend
@@ -91,8 +95,7 @@ curl -X POST http://127.0.0.1:8000/api/reports/generate
 
 ```bash
 cd backend
-source .venv/bin/activate
-python -m pytest -v
+uv run pytest -v
 
 cd ../frontend
 npm test

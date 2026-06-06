@@ -27,13 +27,16 @@ cleanup() {
 
 trap cleanup EXIT INT TERM
 
-if [[ ! -d "$BACKEND_DIR/.venv" ]]; then
-  echo "Creating backend virtual environment..."
-  python3 -m venv "$BACKEND_DIR/.venv"
+if ! command -v uv >/dev/null 2>&1; then
+  echo "uv is required. Install it with: brew install uv"
+  exit 1
 fi
 
-echo "Installing backend dependencies..."
-"$BACKEND_DIR/.venv/bin/python" -m pip install -e "$BACKEND_DIR[dev]"
+echo "Installing backend dependencies with uv..."
+(
+  cd "$BACKEND_DIR"
+  uv sync --extra dev
+)
 
 if [[ ! -d "$FRONTEND_DIR/node_modules" ]]; then
   echo "Installing frontend dependencies..."
@@ -43,8 +46,7 @@ fi
 echo "Starting backend: http://127.0.0.1:8000"
 (
   cd "$BACKEND_DIR"
-  . .venv/bin/activate
-  uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
+  uv run uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
 ) &
 BACKEND_PID=$!
 
