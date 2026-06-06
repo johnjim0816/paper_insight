@@ -28,3 +28,27 @@ class AppConfigPayload(BaseModel):
     search: SearchConfig = Field(default_factory=SearchConfig)
     summary: SummaryConfig = Field(default_factory=SummaryConfig)
     delivery: DeliveryConfig = Field(default_factory=DeliveryConfig)
+
+
+class PaperResponse(BaseModel):
+    id: int
+    dedup_key: str
+    source: str
+    title: str
+    abstract: str | None
+    authors: list[str]
+    venue: str | None
+    published_at: str | None
+    url: str
+    doi: str | None
+    arxiv_id: str | None
+    semantic_scholar_id: str | None
+    citation_count: int | None
+    topic_names: list[str]
+    match_reasons: list[str]
+
+
+class PaperSearchResponse(BaseModel):
+    count: int
+    papers: list[PaperResponse]
+    warnings: list[str] = Field(default_factory=list)

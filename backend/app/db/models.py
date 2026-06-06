@@ -78,3 +78,34 @@ class AppConfig(Base):
     delivery_mode: Mapped[str] = mapped_column(String(40), default="app_bot")
     recipient_id_type: Mapped[str] = mapped_column(String(40), default="email")
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)
+
+
+class Paper(Base):
+    __tablename__ = "papers"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    dedup_key: Mapped[str] = mapped_column(String(120), unique=True, index=True)
+    source: Mapped[str] = mapped_column(String(80))
+    source_id: Mapped[str] = mapped_column(String(200))
+    title: Mapped[str] = mapped_column(Text)
+    abstract: Mapped[str | None] = mapped_column(Text)
+    authors: Mapped[str] = mapped_column(Text, default="[]")
+    venue: Mapped[str | None] = mapped_column(String(240))
+    published_at: Mapped[str | None] = mapped_column(String(40))
+    url: Mapped[str] = mapped_column(Text)
+    doi: Mapped[str | None] = mapped_column(String(240))
+    arxiv_id: Mapped[str | None] = mapped_column(String(120))
+    semantic_scholar_id: Mapped[str | None] = mapped_column(String(120))
+    citation_count: Mapped[int | None] = mapped_column(Integer)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)
+
+
+class PaperMatch(Base):
+    __tablename__ = "paper_matches"
+    __table_args__ = (UniqueConstraint("paper_id", "topic_name"),)
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    paper_id: Mapped[int] = mapped_column(ForeignKey("papers.id", ondelete="CASCADE"))
+    topic_name: Mapped[str] = mapped_column(String(120))
+    reasons: Mapped[str] = mapped_column(Text, default="[]")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)

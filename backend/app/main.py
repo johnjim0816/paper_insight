@@ -5,6 +5,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.config import router as config_router
+from app.api.papers import router as papers_router
 from app.db.session import init_db
 
 
@@ -31,3 +32,4 @@ def health() -> dict[str, str]:
 
 
 app.include_router(config_router)
+app.include_router(papers_router)
