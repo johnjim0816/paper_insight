@@ -1,13 +1,18 @@
 import httpx
 
+from app.core.config import get_settings
 from app.services.paper_sources.base import PaperCandidate, PaperQuery
 
 
 class SemanticScholarSource:
     base_url = "https://api.semanticscholar.org/graph/v1/paper/search"
 
+    def __init__(self, api_key: str | None = None) -> None:
+        self.api_key = api_key if api_key is not None else get_settings().semantic_scholar_api_key
+
     async def search(self, query: PaperQuery) -> list[PaperCandidate]:
         text_query = " ".join(query.keywords + query.venues).strip() or "machine learning"
+        headers = {"x-api-key": self.api_key} if self.api_key else None
         async with httpx.AsyncClient(timeout=20.0) as client:
             response = await client.get(
                 self.base_url,
@@ -16,6 +21,7 @@ class SemanticScholarSource:
                     "limit": query.max_results,
                     "fields": "paperId,title,abstract,authors,venue,year,url,citationCount,externalIds",
                 },
+                headers=headers,
             )
             response.raise_for_status()
 

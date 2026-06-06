@@ -22,6 +22,8 @@ def default_sources() -> list[PaperSource]:
 
 def _source_warning(source: PaperSource, exc: Exception) -> str:
     if isinstance(exc, httpx.HTTPStatusError):
+        if source.__class__.__name__ == "SemanticScholarSource" and exc.response.status_code == 429:
+            return "SemanticScholarSource: HTTP 429 rate limited; set SEMANTIC_SCHOLAR_API_KEY or retry later"
         return f"{source.__class__.__name__}: HTTP {exc.response.status_code}"
 
     message = str(exc).strip().splitlines()[0] if str(exc).strip() else exc.__class__.__name__

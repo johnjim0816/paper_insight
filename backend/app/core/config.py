@@ -9,6 +9,7 @@ class Settings(BaseSettings):
     openai_api_key: str | None = None
     openai_base_url: str = "https://api.openai.com/v1"
     openai_model: str = "gpt-4.1-mini"
+    semantic_scholar_api_key: str | None = None
     feishu_app_id: str | None = None
     feishu_app_secret: str | None = None
     feishu_recipient_id: str | None = None

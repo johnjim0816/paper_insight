@@ -75,6 +75,14 @@ OPENAI_MODEL=gpt-4.1-mini
 
 If `OPENAI_API_KEY` is missing or the request fails, reports are still generated with metadata-only fallback summaries.
 
+## Semantic Scholar Setup
+
+Semantic Scholar can rate-limit unauthenticated API requests. To reduce HTTP 429 warnings, request an API key from the Semantic Scholar API page and configure:
+
+```env
+SEMANTIC_SCHOLAR_API_KEY=xxx
+```
+
 ## Codex Automation Command
 
 Run the full daily workflow:

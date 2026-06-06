@@ -84,3 +84,14 @@ async def test_semantic_scholar_source_parses_json(monkeypatch):
     assert result[0].semantic_scholar_id == "s2-1"
     assert result[0].venue == "ICLR"
     assert result[0].citation_count == 10
+
+
+@pytest.mark.asyncio
+async def test_semantic_scholar_source_sends_api_key_header(monkeypatch):
+    payload = {"data": []}
+    fake = FakeClient(FakeResponse(payload=payload))
+    monkeypatch.setattr("app.services.paper_sources.semantic_scholar.httpx.AsyncClient", lambda timeout: fake)
+
+    await SemanticScholarSource(api_key="s2-test-key").search(PaperQuery(["agent"], [], [], 7, 5))
+
+    assert fake.calls[0][2] == {"x-api-key": "s2-test-key"}

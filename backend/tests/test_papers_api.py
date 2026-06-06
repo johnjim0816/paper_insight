@@ -1,6 +1,8 @@
 import httpx
 
+from app.api.papers import _source_warning
 from app.services.paper_sources.base import PaperCandidate
+from app.services.paper_sources.semantic_scholar import SemanticScholarSource
 
 
 class FakeSource:
@@ -67,6 +69,16 @@ def test_search_papers_returns_compact_source_warnings(client, monkeypatch):
 
     assert response.status_code == 200
     assert response.json()["warnings"] == ["RateLimitedSource: HTTP 429"]
+
+
+def test_semantic_scholar_rate_limit_warning_mentions_api_key():
+    request = httpx.Request("GET", "https://api.semanticscholar.org/graph/v1/paper/search")
+    response = httpx.Response(429, request=request)
+    exc = httpx.HTTPStatusError("Rate limited", request=request, response=response)
+
+    warning = _source_warning(SemanticScholarSource(), exc)
+
+    assert warning == "SemanticScholarSource: HTTP 429 rate limited; set SEMANTIC_SCHOLAR_API_KEY or retry later"
 
 
 def test_search_papers_uses_default_topic_without_manual_save(client, monkeypatch):
