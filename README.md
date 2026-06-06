@@ -50,6 +50,18 @@ Use the Config page to set:
 
 Secrets stay in `backend/.env`, not in the browser.
 
+Paper and report artifacts are saved under `DATA_DIR`. If it is not set, the backend uses:
+
+- Windows: `C:/Users/Administrator/OneDrive/ASELF/Data/PaperInsight/`
+- Linux: `/home/jj/OneDrive/ASELF/Data/PaperInsight/`
+- macOS: `/Users/johnjim/Library/CloudStorage/OneDrive-个人/ASELF/Data/PaperInsight/`
+
+Configure an override in `backend/.env` when needed:
+
+```env
+DATA_DIR=/absolute/path/to/PaperInsight
+```
+
 ## Feishu Setup
 
 Create a Feishu custom app, enable bot capability, and make sure your account is in the app availability scope. Configure:

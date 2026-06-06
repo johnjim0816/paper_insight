@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from app.core.config import get_settings
 from app.db.models import Paper, Report, ReportItem
 from app.schemas import ReportResponse
+from app.services.artifact_store import save_report_artifacts
 from app.services.paper_repository import paper_to_response
 from app.services.report_builder import build_report_markdown
 from app.services.summarizer import summarize_paper
@@ -43,4 +44,6 @@ async def generate_report(db: Session, report_date: str | None = None) -> Report
 
     db.commit()
     db.refresh(report)
-    return ReportResponse(id=report.id, report_date=report.report_date, title=report.title, markdown=report.markdown)
+    response = ReportResponse(id=report.id, report_date=report.report_date, title=report.title, markdown=report.markdown)
+    save_report_artifacts(response, paper_count=len(paper_responses), settings=settings)
+    return response

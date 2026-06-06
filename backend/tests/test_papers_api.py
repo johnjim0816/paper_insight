@@ -1,6 +1,8 @@
 import httpx
+import json
 
 from app.api.papers import _source_warning
+from app.core.config import get_settings
 from app.services.paper_sources.base import PaperCandidate
 from app.services.paper_sources.semantic_scholar import SemanticScholarSource
 
@@ -60,6 +62,28 @@ def test_search_papers_saves_matches(client, monkeypatch):
     list_response = client.get("/api/papers")
     assert list_response.status_code == 200
     assert list_response.json()[0]["dedup_key"] == "doi:10.1000/fake"
+
+
+def test_search_papers_writes_results_to_configured_data_dir(client, monkeypatch, tmp_path):
+    get_settings.cache_clear()
+    monkeypatch.setenv("DATA_DIR", str(tmp_path))
+    monkeypatch.setattr("app.api.papers.default_sources", lambda: [FakeSource()])
+
+    response = client.post("/api/papers/search")
+
+    assert response.status_code == 200
+    papers_file = tmp_path / "papers" / "papers.json"
+    sources_file = tmp_path / "papers" / "sources.json"
+    assert papers_file.exists()
+    assert sources_file.exists()
+
+    papers_payload = json.loads(papers_file.read_text(encoding="utf-8"))
+    assert papers_payload["count"] == 1
+    assert papers_payload["papers"][0]["title"] == "Tool Use for LLM Agents"
+
+    sources_payload = json.loads(sources_file.read_text(encoding="utf-8"))
+    assert sources_payload["query"]["keywords"] == ["LLM agent", "tool use", "autonomous agents"]
+    get_settings.cache_clear()
 
 
 def test_search_papers_returns_compact_source_warnings(client, monkeypatch):

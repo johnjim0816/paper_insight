@@ -7,6 +7,7 @@ from app.api.config import _read_config
 from app.db.models import Paper
 from app.db.session import get_db
 from app.schemas import PaperResponse, PaperSearchResponse
+from app.services.artifact_store import save_paper_search_artifacts
 from app.services.matching import match_paper
 from app.services.paper_repository import paper_to_response, upsert_paper
 from app.services.paper_sources.arxiv import ArxivSource
@@ -60,6 +61,7 @@ async def search_papers(db: Session = Depends(get_db)) -> PaperSearchResponse:
     db.commit()
 
     responses = [paper_to_response(db, paper) for paper in saved_by_id.values()]
+    save_paper_search_artifacts(responses, warnings, query)
     return PaperSearchResponse(count=len(responses), papers=responses, warnings=warnings)
 
 
