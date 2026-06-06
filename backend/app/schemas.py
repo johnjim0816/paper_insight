@@ -52,3 +52,16 @@ class PaperSearchResponse(BaseModel):
     count: int
     papers: list[PaperResponse]
     warnings: list[str] = Field(default_factory=list)
+
+
+class ReportResponse(BaseModel):
+    id: int
+    report_date: str
+    title: str
+    markdown: str
+
+
+class DeliveryResponse(BaseModel):
+    status: str
+    message_id: str | None = None
+    detail: str | None = None

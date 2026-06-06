@@ -109,3 +109,34 @@ class PaperMatch(Base):
     topic_name: Mapped[str] = mapped_column(String(120))
     reasons: Mapped[str] = mapped_column(Text, default="[]")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)
+
+
+class Report(Base):
+    __tablename__ = "reports"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    report_date: Mapped[str] = mapped_column(String(20), unique=True, index=True)
+    title: Mapped[str] = mapped_column(String(240))
+    markdown: Mapped[str] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)
+
+
+class ReportItem(Base):
+    __tablename__ = "report_items"
+    __table_args__ = (UniqueConstraint("report_id", "paper_id"),)
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    report_id: Mapped[int] = mapped_column(ForeignKey("reports.id", ondelete="CASCADE"))
+    paper_id: Mapped[int] = mapped_column(ForeignKey("papers.id", ondelete="CASCADE"))
+    summary: Mapped[str] = mapped_column(Text)
+
+
+class DeliveryLog(Base):
+    __tablename__ = "delivery_logs"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    provider: Mapped[str] = mapped_column(String(40))
+    report_id: Mapped[int | None] = mapped_column(Integer)
+    status: Mapped[str] = mapped_column(String(40))
+    response: Mapped[str] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)
