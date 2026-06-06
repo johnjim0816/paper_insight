@@ -12,6 +12,7 @@
 
 body {
   margin: 0;
+  overflow-x: hidden;
 }
 
 button,
@@ -89,6 +90,7 @@ a {
 }
 
 .content {
+  max-width: 100%;
   min-width: 0;
   padding: 26px;
 }
@@ -128,12 +130,14 @@ a {
   color: #64748b;
   line-height: 1.5;
   margin: 6px 0 0;
+  overflow-wrap: anywhere;
 }
 
 .panel {
   background: #ffffff;
   border: 1px solid #d8e0e8;
   border-radius: 8px;
+  min-width: 0;
   padding: 18px;
 }
 
@@ -308,18 +312,31 @@ textarea {
 @media (max-width: 860px) {
   .app-shell {
     grid-template-columns: 1fr;
+    max-width: 100vw;
+    overflow-x: hidden;
+    width: 100vw;
   }
 
   .sidebar {
+    max-width: 100vw;
+    overflow-x: hidden;
     padding: 14px;
+    width: 100vw;
   }
 
   .sidebar nav {
-    grid-template-columns: repeat(5, minmax(0, 1fr));
+    display: flex;
+    gap: 4px;
+    width: 100%;
   }
 
   .sidebar button {
+    flex: 1 1 0;
     justify-content: center;
+    min-width: 0;
+    padding-left: 0;
+    padding-right: 0;
+    width: auto;
   }
 
   .sidebar button span {
@@ -327,7 +344,15 @@ textarea {
   }
 
   .content {
+    max-width: 100vw;
+    overflow-x: hidden;
     padding: 18px;
+    width: 100vw;
+  }
+
+  .topbar-status {
+    max-width: 100%;
+    white-space: normal;
   }
 
   .topbar,
@@ -342,6 +367,16 @@ textarea {
   .dashboard-grid,
   .form-grid {
     grid-template-columns: 1fr;
+  }
+
+  .button-row {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .button-row button {
+    justify-content: center;
+    width: 100%;
   }
 
   .paper-row {
